@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: db_test
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_cache_2_data:/var/lib/postgresql
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_NAME}
+    env_file:
+      - ".env"
+    networks:
+      ShopNetwork:
+
+volumes:
+  db_cache_2_data:
+
+networks:
+  ShopNetwork:
+    external: true

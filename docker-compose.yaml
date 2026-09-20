@@ -1,0 +1,26 @@
+services:
+  cache:
+    container_name: redis_2_cache
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ShopNetwork
+
+  backend:
+    build:
+      context: .
+    container_name: backend_2_cache
+    ports:
+      - "8000:8000"
+    networks:
+      - ShopNetwork
+
+volumes:
+  redis_data:
+
+networks:
+  ShopNetwork:
+    external: true
