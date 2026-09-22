@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Response, Request
+from icecream import ic
 
-from src.api.dependencies import ServiceDep
+from src.api.dependencies import ServiceDep, UserIdDep
 from src.schemas.auth import AuthUserSchema
 
 router = APIRouter(prefix="/auth", tags=["👥 Пользователи"])
@@ -30,3 +31,13 @@ async def login_user(
         request=request,
         response_inst=response_inst
     )
+
+
+@router.get(
+    path="/me"
+)
+async def get_user_data(
+    service: ServiceDep,
+    user_id: UserIdDep,
+):
+    return await service.users.get_curr_user(user_id=user_id)

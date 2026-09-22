@@ -5,6 +5,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Any
 
 import jwt
+from icecream import ic
 from pwdlib import PasswordHash
 
 from src.config import settings
@@ -30,9 +31,10 @@ class AccessTokenService:
         exp_minutes = settings.jwt.ACCESS_TOKEN_EXP
         exp = iat + timedelta(seconds=exp_minutes)
         to_encode.update({"iat": iat, "exp": exp})
+        private_key = settings.jwt.PRIVATE_KEY_PATH.read_text()
         return jwt.encode(
             payload=to_encode,
-            key=settings.jwt.PRIVATE_KEY_PATH.read_text(),
+            key=private_key,
             algorithm=settings.JWT_ALGORITHM
         )
 
@@ -40,7 +42,7 @@ class AccessTokenService:
     def decode_token(cls, token: str) -> dict[Any, Any]:
         return jwt.decode(
             jwt=token,
-            key=settings.jwt.PUBLIC_KEY_PATH,
+            key=settings.jwt.PUBLIC_KEY_PATH.read_text(),
             algorithms=[settings.JWT_ALGORITHM]
         )
 

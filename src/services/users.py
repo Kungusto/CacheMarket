@@ -1,6 +1,7 @@
 from datetime import datetime, timezone, timedelta
 
 from fastapi import Response, Request
+from icecream import ic
 from starlette.responses import Response
 
 from src.exceptions.auth import AlreadyLoggedInHTTPException
@@ -11,7 +12,7 @@ from src.exceptions.users import EmailAlreadyRegisteredHTTPException, UserNotFou
     WrongPasswordHTTPException
 from src.schemas.auth import AuthUserSchema
 from src.schemas.tokens import RefreshTokenAddDTO
-from src.schemas.users import UserAddDTO, UserDTO
+from src.schemas.users import UserAddDTO, UserDTO, UserPublicSchema
 from src.services.auth import PasswordService, AccessTokenService, RefreshTokenService
 
 
@@ -83,3 +84,8 @@ class UsersService(BaseService):
             raise WrongPasswordHTTPException()
         await self._auth_user(response_inst, user.user_id)
         return {"status": "OK"}
+
+
+    async def get_curr_user(self, user_id: int):
+        user = await self.db.users.get_user_by_user_id(user_id=user_id)
+        return UserPublicSchema.model_validate(user, from_attributes=True)

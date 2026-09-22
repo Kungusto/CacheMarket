@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).parent
 class JWTConfig:
     ACCESS_TOKEN_EXP: int = 60 * 15
     REFRESH_TOKEN_EXP: int = 60 * 60 * 24 * 30
-    PRIVATE_KEY_PATH: Path = BASE_DIR / "certs" / "jwt-public.pem"
+    PRIVATE_KEY_PATH: Path = BASE_DIR / "certs" / "jwt-private.pem"
     PUBLIC_KEY_PATH: Path = BASE_DIR / "certs" / "jwt-public.pem"
 
 
