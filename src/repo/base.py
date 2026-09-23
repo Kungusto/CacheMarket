@@ -1,7 +1,7 @@
 from typing import Literal
 
 from pydantic import BaseModel
-from sqlalchemy import select, delete, insert, update
+from sqlalchemy import delete, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing_extensions import overload
@@ -18,42 +18,40 @@ class BaseRepo[SchemaType: BaseModel]:
         self.session = session
 
     @overload
-    async def get_filtered(self, *conditions, get_one: Literal[True]) -> SchemaType | None:
-        ...
+    async def get_filtered(
+        self, *conditions, get_one: Literal[True]
+    ) -> SchemaType | None: ...
 
     @overload
-    async def get_filtered(self, *conditions, get_one: Literal[False]) -> list[SchemaType]:
-        ...
+    async def get_filtered(
+        self, *conditions, get_one: Literal[False]
+    ) -> list[SchemaType]: ...
 
-    async def get_filtered(self, *conditions, get_one: bool = False) -> SchemaType | list[SchemaType] | None:
+    async def get_filtered(
+        self, *conditions, get_one: bool = False
+    ) -> SchemaType | list[SchemaType] | None:
         query = select(self.model)
         if conditions:
             query = query.filter(*conditions)
         result = await self.session.execute(query)
         if get_one:
             model = result.scalar_one_or_none()
-            return self.schema.model_validate(model, from_attributes=True) if model else None
+            return (
+                self.schema.model_validate(model, from_attributes=True)
+                if model
+                else None
+            )
         models = result.scalars().all()
         return [
-            self.schema.model_validate(model, from_attributes=True)
-            for model in models
+            self.schema.model_validate(model, from_attributes=True) for model in models
         ]
 
-
     async def delete(self, *conditions, **filter_by):
-        query = (
-            delete(self.model)
-            .filter(*conditions)
-            .filter_by(**filter_by)
-        )
+        query = delete(self.model).filter(*conditions).filter_by(**filter_by)
         await self.session.execute(query)
 
     async def add(self, data: BaseModel) -> SchemaType:
-        stmt = (
-            insert(self.model)
-            .values(**data.model_dump())
-            .returning(self.model)
-        )
+        stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
         try:
             result = await self.session.execute(stmt)
         except IntegrityError as ex:

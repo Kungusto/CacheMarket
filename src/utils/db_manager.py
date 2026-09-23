@@ -1,4 +1,4 @@
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.repo.products import ProductsRepo
 from src.repo.tokens import RefreshTokensRepo

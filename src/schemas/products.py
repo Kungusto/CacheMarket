@@ -14,4 +14,3 @@ class ProductDTO(BaseModel):
     stock_quantity: int
     created_at: datetime
     updated_at: datetime
-

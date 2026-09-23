@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from sqlalchemy import Numeric, NUMERIC, TIMESTAMP
+from sqlalchemy import TIMESTAMP, Numeric
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.database import BaseORM

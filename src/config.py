@@ -5,6 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).parent
 
+
 class JWTConfig:
     ACCESS_TOKEN_EXP: int = 60 * 15
     REFRESH_TOKEN_EXP: int = 60 * 60 * 24 * 30
@@ -50,4 +51,5 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=BASE_DIR.parent / ".env")
 
-settings = Settings() # type: ignore
+
+settings = Settings()  # type: ignore

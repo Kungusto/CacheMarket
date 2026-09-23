@@ -1,5 +1,3 @@
-import time
-
 from redis.asyncio import Redis
 from redis.backoff import NoBackoff
 from redis.retry import Retry
@@ -13,7 +11,7 @@ redis_conn = Redis(
     decode_responses=True,
     socket_timeout=0.5,
     socket_connect_timeout=0.5,
-    retry=Retry(NoBackoff(), retries=0)
+    retry=Retry(NoBackoff(), retries=0),
 )
 
 redis_breaker = RedisCircuitBreaker(cooldown=10.0)

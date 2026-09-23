@@ -1,4 +1,5 @@
-from typing import AsyncGenerator, Annotated
+from collections.abc import AsyncGenerator
+from typing import Annotated
 
 from fastapi import Depends, Request
 
@@ -16,10 +17,13 @@ async def get_db_generator() -> AsyncGenerator[DBManager, None]:
 
 DBDep = Annotated[DBManager, Depends(get_db_generator)]
 
-async def get_service_dep(db = Depends(get_db_generator)) -> ServiceManager:
+
+async def get_service_dep(db=Depends(get_db_generator)) -> ServiceManager:
     return ServiceManager(db=db)
 
+
 ServiceDep = Annotated[ServiceManager, Depends(get_service_dep)]
+
 
 def get_user_access_token(request: Request) -> str | None:
     access_token = request.cookies.get("access_token", None)
@@ -28,11 +32,22 @@ def get_user_access_token(request: Request) -> str | None:
     return access_token
 
 
-def get_user_id(access_token = Depends(get_user_access_token)) -> int:
+def get_user_id(access_token=Depends(get_user_access_token)) -> int:
     decoded_token = AccessTokenService.decode_token(token=access_token)
     user_id_as_str = decoded_token.get("user_id")
     if user_id_as_str is None:
         raise UnauthorizedHTTPException()
     return int(user_id_as_str)
 
+
 UserIdDep = Annotated[int, Depends(get_user_id)]
+
+
+def get_user_refresh_token(request: Request) -> str | None:
+    refresh_token = request.cookies.get("refresh_token", None)
+    if refresh_token is None:
+        raise UnauthorizedHTTPException()
+    return refresh_token
+
+
+RefreshTokenDep = Annotated[str, Depends(get_user_refresh_token)]

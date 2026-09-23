@@ -1,14 +1,15 @@
 import asyncio
 import logging
 import random
-from functools import wraps, partial
+from collections.abc import Awaitable, Callable
+from functools import partial, wraps
 from inspect import signature
-from typing import Callable, Awaitable, Any, Literal, Protocol
+from typing import Literal, Protocol
 
 from pydantic import BaseModel
 from redis import RedisError
 
-from src.cache.redis_conn import redis_conn, redis_breaker
+from src.cache.redis_conn import redis_breaker, redis_conn
 from src.decorators.protocol import CachedMethod
 
 _MISS_PLACEHOLDER = "__miss__"
@@ -17,8 +18,10 @@ log = logging.getLogger(__name__)
 
 type Fetch = Callable[[], Awaitable[BaseModel | None]]
 
+
 class SchemaOwner(Protocol):
     schema: type[BaseModel]
+
 
 LOCK_SUFFIX = ":lock"
 LOCK_PLACEHOLDER = "1"
@@ -26,19 +29,16 @@ LOCK_TTL = 5
 LOCK_MAX_WAIT = 3.0
 POLL_INTERVAL = 0.3
 
-def _handle_redis_degradation(
-        action: Literal["CREATE", "READ", "DELETE"] = "READ"
-):
-    actions_map = {
-        "CREATE": "записи",
-        "READ": "чтения",
-        "DELETE": "удаления"
-    }
+
+def _handle_redis_degradation(action: Literal["CREATE", "READ", "DELETE"] = "READ"):
+    actions_map = {"CREATE": "записи", "READ": "чтения", "DELETE": "удаления"}
     log.warning("Redis недоступен для %s", actions_map.get(action), exc_info=True)
     redis_breaker.record_failure()
 
+
 def _map_result(res: BaseModel | None) -> str:
-    return  _MISS_PLACEHOLDER if res is None else res.model_dump_json()
+    return _MISS_PLACEHOLDER if res is None else res.model_dump_json()
+
 
 async def _get_with_lock(
     repo_inst: SchemaOwner,
@@ -90,7 +90,11 @@ async def _get_with_lock(
                     log.warning("Redis недоступен для чтения", exc_info=True)
                     return await fetch()
                 if cached is not None:
-                    return repo_inst.schema.model_validate_json(cached) if cached != _MISS_PLACEHOLDER else None
+                    return (
+                        repo_inst.schema.model_validate_json(cached)
+                        if cached != _MISS_PLACEHOLDER
+                        else None
+                    )
                 waited += POLL_INTERVAL
         except RedisError:
             _handle_redis_degradation(action="READ")
@@ -117,24 +121,15 @@ def cache(
 
             if stampede_protection:
                 return await _get_with_lock(
-                    key=key,
-                    actual_ttl=actual_ttl,
-                    fetch=fetch,
-                    repo_inst=self
+                    key=key, actual_ttl=actual_ttl, fetch=fetch, repo_inst=self
                 )
 
             return await _get_plain(
-                actual_ttl=actual_ttl,
-                key=key,
-                fetch=fetch,
-                repo_inst=self
+                actual_ttl=actual_ttl, key=key, fetch=fetch, repo_inst=self
             )
 
         async def _get_plain(
-            repo_inst: SchemaOwner,
-            actual_ttl: int,
-            key: str,
-            fetch: Fetch
+            repo_inst: SchemaOwner, actual_ttl: int, key: str, fetch: Fetch
         ) -> BaseModel | None:
             cached = None
 
@@ -176,4 +171,5 @@ def cache(
 
         inner.invalidate = invalidate
         return inner
+
     return wrapper

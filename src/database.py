@@ -1,5 +1,5 @@
 from sqlalchemy import MetaData
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
 from src.config import settings
@@ -18,6 +18,6 @@ convention = {
 
 metadata = MetaData(naming_convention=convention)
 
+
 class BaseORM(DeclarativeBase):
     metadata = metadata
-

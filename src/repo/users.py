@@ -1,5 +1,3 @@
-from sqlalchemy import select
-
 from src.decorators.cache import cache
 from src.models.users import UsersORM
 from src.repo.base import BaseRepo

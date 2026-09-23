@@ -1,6 +1,7 @@
 """
 Файл для заполнения БД огромным количеством товаров
 """
+
 import asyncio
 import random
 import sys

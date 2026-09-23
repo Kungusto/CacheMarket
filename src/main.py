@@ -8,19 +8,20 @@ from fastapi import FastAPI
 
 sys.path.append(str(Path(__file__).parent.parent))
 
+from src.api.auth import router as users_router
+from src.api.products import router as products_router
 from src.exceptions.base import BaseAppHTTPException
 from src.handlers.base import base_app_exception_handler
-from src.api.products import router as products_router
-from src.api.users import router as users_router
-
 
 app = FastAPI()
+
 
 def register_handlers():
     app.add_exception_handler(
         BaseAppHTTPException,
         base_app_exception_handler,
     )
+
 
 async def main():
     logging.basicConfig(level=logging.INFO)

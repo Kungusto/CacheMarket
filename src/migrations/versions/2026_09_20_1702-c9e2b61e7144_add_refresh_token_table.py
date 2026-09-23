@@ -6,17 +6,17 @@ Create Date: 2026-09-20 17:02:10.721780
 
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = "c9e2b61e7144"
-down_revision: Union[str, Sequence[str], None] = "6602ea56a485"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "6602ea56a485"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -26,12 +26,8 @@ def upgrade() -> None:
         "refresh_tokens",
         sa.Column("token_hash", sa.String(), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=False),
-        sa.Column(
-            "created_at", postgresql.TIMESTAMP(timezone=True), nullable=False
-        ),
-        sa.Column(
-            "expires_at", postgresql.TIMESTAMP(timezone=True), nullable=False
-        ),
+        sa.Column("created_at", postgresql.TIMESTAMP(timezone=True), nullable=False),
+        sa.Column("expires_at", postgresql.TIMESTAMP(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(
             ["user_id"],
             ["users.user_id"],
