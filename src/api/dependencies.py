@@ -24,14 +24,15 @@ ServiceDep = Annotated[ServiceManager, Depends(get_service_dep)]
 def get_user_access_token(request: Request) -> str | None:
     access_token = request.cookies.get("access_token", None)
     if access_token is None:
-        raise UnauthorizedHTTPException
+        raise UnauthorizedHTTPException()
     return access_token
+
 
 def get_user_id(access_token = Depends(get_user_access_token)) -> int:
     decoded_token = AccessTokenService.decode_token(token=access_token)
     user_id_as_str = decoded_token.get("user_id")
     if user_id_as_str is None:
-        raise UnauthorizedHTTPException
+        raise UnauthorizedHTTPException()
     return int(user_id_as_str)
 
 UserIdDep = Annotated[int, Depends(get_user_id)]

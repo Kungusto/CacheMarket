@@ -1,7 +1,7 @@
 from typing import Literal
 
 from pydantic import BaseModel
-from sqlalchemy import select, delete, insert
+from sqlalchemy import select, delete, insert, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing_extensions import overload
@@ -25,7 +25,7 @@ class BaseRepo[SchemaType: BaseModel]:
     async def get_filtered(self, *conditions, get_one: Literal[False]) -> list[SchemaType]:
         ...
 
-    async def get_filtered(self, *conditions, get_one: bool) -> SchemaType | list[SchemaType] | None:
+    async def get_filtered(self, *conditions, get_one: bool = False) -> SchemaType | list[SchemaType] | None:
         query = select(self.model)
         if conditions:
             query = query.filter(*conditions)
@@ -60,3 +60,11 @@ class BaseRepo[SchemaType: BaseModel]:
             raise map_integrity_error(ex) from ex
         model = result.scalar_one_or_none()
         return self.schema.model_validate(model, from_attributes=True)
+
+    async def edit(self, *conditions, data: BaseModel, exclude_unset: bool = False):
+        stmt = (
+            update(self.model)
+            .filter(*conditions)
+            .values(data.model_dump(exclude_unset=exclude_unset))
+        )
+        await self.session.execute(stmt)

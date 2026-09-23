@@ -20,4 +20,6 @@ class RefreshTokensORM(BaseORM):
     expires_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
     )
-
+    invoked_at: Mapped[datetime | None] = mapped_column(
+        TIMESTAMP(timezone=True)
+    )

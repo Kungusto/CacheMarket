@@ -57,7 +57,7 @@ class UsersService(BaseService):
                 )
             )
         except DatabaseException as ex:
-            raise EmailAlreadyRegisteredHTTPException from ex
+            raise EmailAlreadyRegisteredHTTPException() from ex
         await self._auth_user(response_inst, user.user_id)
         await self.db.commit()
         return {

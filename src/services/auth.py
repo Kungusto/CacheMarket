@@ -5,10 +5,14 @@ from datetime import datetime, timezone, timedelta
 from typing import Any
 
 import jwt
-from icecream import ic
 from pwdlib import PasswordHash
 
+from fastapi import Response, Request
+
 from src.config import settings
+from src.exceptions.auth import UnauthorizedHTTPException, InvalidRefreshTokenHTTPException
+from src.schemas.tokens import RefreshTokenAddDTO, RefreshTokenEditDTO
+from src.services.base import BaseService
 
 
 class PasswordService:
@@ -56,3 +60,30 @@ class RefreshTokenService:
     @staticmethod
     def hash_token(token: str):
         return hashlib.sha256(token.encode()).hexdigest()
+
+
+class SessionsService(BaseService):
+    async def get_user_sessions(self, user_id: int) -> list[RefreshTokenAddDTO]:
+        return await self.db.refresh_tokens.get_filtered(
+            self.db.refresh_tokens.model.user_id == user_id,
+        )
+
+    async def logout_session(self, request: Request, response: Response):
+        refresh_token = request.cookies.get("refresh_token", None)
+        if refresh_token is None:
+            raise UnauthorizedHTTPException()
+        hashed_token = RefreshTokenService.hash_token(token=refresh_token)
+        token_hash = await self.db.refresh_tokens.get_filtered(
+            self.db.refresh_tokens.model.token_hash == hashed_token
+        )
+        if token_hash is None:
+            raise InvalidRefreshTokenHTTPException()
+        await self.db.refresh_tokens.edit(
+            self.db.refresh_tokens.model.token_hash == hashed_token,
+            data=RefreshTokenEditDTO(
+                expires_at=datetime.now(timezone.utc)
+            )
+        )
+        response.delete_cookie("access_token")
+        response.delete_cookie("refresh_token")
+        return {"status": "OK"}
