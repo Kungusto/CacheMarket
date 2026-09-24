@@ -1,5 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from src.repo.notification import NotificationRepo
+from src.repo.product_sub import ProductSubsRepo
 from src.repo.products import ProductsRepo
 from src.repo.tokens import RefreshTokensRepo
 from src.repo.users import UsersRepo
@@ -15,6 +17,8 @@ class DBManager:
         self.products = ProductsRepo(session=self.session)
         self.users = UsersRepo(session=self.session)
         self.refresh_tokens = RefreshTokensRepo(session=self.session)
+        self.notifications = NotificationRepo(session=self.session)
+        self.product_subs = ProductSubsRepo(session=self.session)
 
         return self
 

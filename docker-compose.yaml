@@ -17,6 +17,16 @@ services:
       - "8000:8000"
     networks:
       - ShopNetwork
+    command:
+      - /app/start.sh
+
+  notifications_worker:
+    build:
+      context: .
+    container_name: notifications_worker_2_cache
+    networks:
+      - ShopNetwork
+    command: ["python", "src/notifications/subscriber.py"]
 
 volumes:
   redis_data:

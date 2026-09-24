@@ -14,3 +14,12 @@ class ProductDTO(BaseModel):
     stock_quantity: int
     created_at: datetime
     updated_at: datetime
+
+
+class ProductEditDTO(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    brand: str | None = None
+    category: str | None = None
+    price: Decimal | None = None
+    stock_quantity: int | None = None

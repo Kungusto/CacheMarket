@@ -46,6 +46,14 @@ class BaseRepo[SchemaType: BaseModel]:
             self.schema.model_validate(model, from_attributes=True) for model in models
         ]
 
+    async def get_all(self):
+        query = select(self.model)
+        result = await self.session.execute(query)
+        models = result.scalars().all()
+        return [
+            self.schema.model_validate(model, from_attributes=True) for model in models
+        ]
+
     async def delete(self, *conditions, **filter_by):
         query = delete(self.model).filter(*conditions).filter_by(**filter_by)
         await self.session.execute(query)
@@ -59,10 +67,23 @@ class BaseRepo[SchemaType: BaseModel]:
         model = result.scalar_one_or_none()
         return self.schema.model_validate(model, from_attributes=True)
 
-    async def edit(self, *conditions, data: BaseModel, exclude_unset: bool = False):
+    async def edit(
+        self, *conditions, data: BaseModel, exclude_unset: bool = False, get_one: bool
+    ):
         stmt = (
             update(self.model)
             .filter(*conditions)
             .values(data.model_dump(exclude_unset=exclude_unset))
+            .returning(self.model)
         )
         await self.session.execute(stmt)
+        result = await self.session.execute(stmt)
+        if get_one:
+            model = result.scalar_one_or_none()
+            if model is None:
+                return None
+            return self.schema.model_validate(model, from_attributes=True)
+        models = result.scalars().all()
+        return [
+            self.schema.model_validate(model, from_attributes=True) for model in models
+        ]

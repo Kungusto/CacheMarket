@@ -124,7 +124,7 @@ class AuthService(BaseService):
         response.delete_cookie("access_token")
         response.delete_cookie("refresh_token")
         await self.db.commit()
-        return self.answers.OK_ANSWR
+        return self.answers.OK_ANSWER
 
     async def update_refresh_token(
         self, curr_token: str, user_id: int, response: Response
@@ -215,7 +215,7 @@ class AuthService(BaseService):
         if not verify_pwd:
             raise WrongPasswordHTTPException()
         await self._auth_user(response_inst, user.user_id)
-        return self.answers.OK_ANSWR
+        return self.answers.OK_ANSWER
 
     async def get_curr_user(self, user_id: int):
         user = await self.db.users.get_user_by_user_id(user_id=user_id)
@@ -226,4 +226,4 @@ class AuthService(BaseService):
             token_hash=RefreshTokenService.hash_token(data.token_hash),
         )
         await self.db.commit()
-        return self.answers.OK_ANSWR
+        return self.answers.OK_ANSWER

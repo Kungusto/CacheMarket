@@ -13,6 +13,10 @@ class JWTConfig:
     PUBLIC_KEY_PATH: Path = BASE_DIR / "certs" / "jwt-public.pem"
 
 
+class PubSubConfig:
+    PRODUCT_EVENTS: str = "products.events"
+
+
 class Settings(BaseSettings):
     """
     Режимы работы:
@@ -38,6 +42,8 @@ class Settings(BaseSettings):
 
     # JWT
     jwt: JWTConfig = JWTConfig()
+    # Pub/Sub
+    pub_sub: PubSubConfig = PubSubConfig()
 
     # Асинхронное подключение
     @property
